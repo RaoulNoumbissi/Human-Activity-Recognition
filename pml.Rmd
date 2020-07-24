@@ -1,0 +1,51 @@
+---
+title: "pml classe prediction"
+author: "Raoul Noumbissi"
+date: "July 24, 2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+The following study predicts how well a group of 6 individuals performed a particular activity. The data for this project has 160 variables representing data from accelerometers on the belt, forearm, arm, and dumbbell of the 6 participants. Nevertheless, we will only use data from accelerometers on the belt and arm of the participants to predict the **classe** variable, which describes the manner in which the activity is performed. We believe the data from the accelerometers on the belt and arm must not be correlated since they describe movement in two parts of the body that are not linked. On the other hand, we don't use the data from accelerometers on the forearm and dumbbell because they must have a strong correlation to the data from the accelerometers on the arm due to the fact that the forearm and dumbell are attached to the arm.
+
+Here, we import the caret library and the pml dataset.
+Our cross-validation procedure consists of splitting the data into 75% training set and 25% testing set.
+```{r splitting pml dataset} 
+
+library("caret")
+
+pml<-read.csv("pml-training.csv")
+pml_reduced <- pml[c(8,9,10,11,37,38,39,40,41,42,43,44,45,46,47,48,49,60,61,62,63,64,65,66,67,68,160)]
+
+inTrain<-createDataPartition(y=pml_reduced$classe, p=0.75, list=FALSE)
+training<-pml_reduced[inTrain,]
+testing<-pml_reduced[-inTrain,]
+dim(training)
+```
+
+let's train our training set using the random forest (rf) method.
+```{r rf model}
+modelFit<-train(classe~.,data=training,preProcess=c("center","scale"),method="rf")
+modelFit
+```
+
+Let's use the model to perdict on the testing set
+```{r predict on the testing set}
+pred<-predict(modelFit,testing)
+sum(testing$classe==pred)/dim(testing)[1]
+```
+
+Finally, let's predict on the validation set.
+```{r predict validation set}
+validation<-read.csv("pml-testing.csv")
+validation_reduced<-validation[c(8,9,10,11,37,38,39,40,41,42,43,44,45,46,47,48,49,60,61,62,63,64,65,66,67,68,160)]
+dim(validation_reduced)
+
+predict_validation<-predict(modelFit,validation_reduced)
+predict_validation
+```
+
+We were able to corretly predict the classe of all the 20 samples in the validation set using our strategy.
