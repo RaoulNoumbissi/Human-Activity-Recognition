@@ -1,5 +1,5 @@
 ---
-title: "pml classe prediction"
+title: "Human-Activity-Recognition"
 author: "Raoul Noumbissi"
 date: "July 24, 2020"
 output: html_document
